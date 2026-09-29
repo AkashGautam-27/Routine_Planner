@@ -1,0 +1,6 @@
+{
+  "name": "Routine Planner - Daily Habit & Goal Tracker",
+  "description": "Lightweight, interactive single-page routine planner with customizable daily blocks, real-time progress visualization, and zero-backend localStorage persistence.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
