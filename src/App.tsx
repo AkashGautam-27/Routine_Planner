@@ -6,12 +6,9 @@ import {
   Calendar,
   Check,
   BarChart3,
-  Table as TableIcon,
-  FileText,
-  Download
+  Table as TableIcon
 } from 'lucide-react';
 import { VisualAnalytics } from './components/VisualAnalytics';
-import { PdfReportModal } from './components/PdfReportModal';
 
 interface RoutineRow {
   id: string;
@@ -63,9 +60,6 @@ function addDaysToISO(isoStr: string, days: number): string {
 export default function App() {
   // Active Tab: 'table' (Excel Spreadsheet) or 'visual' (Analytics & Charts)
   const [activeTab, setActiveTab] = useState<'table' | 'visual'>('table');
-
-  // PDF Report Modal state
-  const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
 
   // State for rows (Routines)
   const [routines, setRoutines] = useState<RoutineRow[]>(() => {
@@ -251,10 +245,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#F3F4F6] text-neutral-900 flex flex-col font-sans">
-      <div className={`flex flex-col flex-1 ${isPdfModalOpen ? 'print:hidden' : ''}`}>
+      <div className="flex flex-col flex-1">
         {/* Excel Style Green Top Bar */}
-        <header className="bg-[#107C41] text-white px-4 py-3 shadow-sm border-b border-[#0C5E31] flex flex-wrap items-center justify-between gap-3 no-print">
-          <div className="flex items-center gap-3">
+        <header className="bg-[#107C41] text-white p-3 sm:px-4 sm:py-3 shadow-sm border-b border-[#0C5E31] flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 no-print">
+          <div className="flex items-center justify-between w-full sm:w-auto gap-3">
             <h1 className="font-bold text-base sm:text-lg tracking-tight">
               Routine Tracker
             </h1>
@@ -288,69 +282,64 @@ export default function App() {
           </div>
 
           {/* Quick Toolbar */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 text-xs">
-            {/* Visual PDF Report Button */}
-            <button
-              type="button"
-              onClick={() => setIsPdfModalOpen(true)}
-              className="flex items-center gap-1.5 bg-[#FFD700] hover:bg-[#FACC15] text-neutral-900 font-extrabold px-3 py-1 rounded shadow-sm border border-amber-500 transition-all active:scale-95 cursor-pointer"
-              title="Download Visual PDF Report with charts and table"
-            >
-              <FileText className="w-3.5 h-3.5 text-neutral-900" />
-              <span>Report</span>
-            </button>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-2.5 text-xs w-full sm:w-auto">
+            {/* Dates Row */}
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              <div className="flex flex-1 sm:flex-none items-center bg-[#0C5E31] rounded px-2 sm:px-2.5 py-1 gap-1 border border-white/20 justify-center min-w-0">
+                <Calendar className="hidden sm:block w-3.5 h-3.5 text-white/80" />
+                <span className="text-white/90 font-medium">Start:</span>
+                <input
+                  type="date"
+                  value={dates[0]?.dateStr || ''}
+                  onChange={(e) => handleSetStartDate(e.target.value)}
+                  className="bg-transparent text-white font-mono text-xs focus:outline-hidden cursor-pointer min-w-0"
+                  title="Change start date to shift all columns"
+                />
+              </div>
 
-            <div className="flex items-center bg-[#0C5E31] rounded px-2.5 py-1 gap-1.5 border border-white/20">
-              <Calendar className="w-3.5 h-3.5 text-white/80" />
-              <span className="text-white/90 font-medium">Start Date:</span>
-              <input
-                type="date"
-                value={dates[0]?.dateStr || ''}
-                onChange={(e) => handleSetStartDate(e.target.value)}
-                className="bg-transparent text-white font-mono text-xs focus:outline-hidden cursor-pointer"
-                title="Change start date to shift all columns"
-              />
+              <div className="flex flex-1 sm:flex-none items-center bg-[#0C5E31] rounded px-2 sm:px-2.5 py-1 gap-1 border border-white/20 justify-center min-w-0">
+                <Calendar className="hidden sm:block w-3.5 h-3.5 text-white/80" />
+                <span className="text-white/90 font-medium">End:</span>
+                <input
+                  type="date"
+                  value={dates[dates.length - 1]?.dateStr || ''}
+                  onChange={(e) => handleSetEndDate(e.target.value)}
+                  className="bg-transparent text-white font-mono text-xs focus:outline-hidden cursor-pointer min-w-0"
+                  title="Change end date to adjust tracking duration"
+                />
+              </div>
             </div>
 
-            <div className="flex items-center bg-[#0C5E31] rounded px-2.5 py-1 gap-1.5 border border-white/20">
-              <Calendar className="w-3.5 h-3.5 text-white/80" />
-              <span className="text-white/90 font-medium">End Date:</span>
-              <input
-                type="date"
-                value={dates[dates.length - 1]?.dateStr || ''}
-                onChange={(e) => handleSetEndDate(e.target.value)}
-                className="bg-transparent text-white font-mono text-xs focus:outline-hidden cursor-pointer"
-                title="Change end date to adjust tracking duration"
-              />
+            {/* Actions Row */}
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
+              <button
+                type="button"
+                onClick={handleAddRoutine}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-white text-[#107C41] font-semibold px-2 sm:px-2.5 py-1 rounded shadow-xs hover:bg-neutral-100 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Add Row</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleAddDateCol}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-[#0C5E31] hover:bg-[#094725] text-white font-semibold px-2 sm:px-2.5 py-1 rounded border border-white/30 transition-colors cursor-pointer whitespace-nowrap"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                <span>Add Date</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetAll}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1 bg-rose-700/80 hover:bg-rose-700 text-white px-2 py-1 rounded border border-rose-400/40 transition-colors cursor-pointer whitespace-nowrap"
+                title="Reset all checkboxes"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={handleAddRoutine}
-              className="flex items-center gap-1 bg-white text-[#107C41] font-semibold px-2.5 py-1 rounded shadow-xs hover:bg-neutral-100 transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Add Row</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleAddDateCol}
-              className="flex items-center gap-1 bg-[#0C5E31] hover:bg-[#094725] text-white font-semibold px-2.5 py-1 rounded border border-white/30 transition-colors cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
-              <span>Add Date</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="flex items-center gap-1 bg-rose-700/80 hover:bg-rose-700 text-white px-2 py-1 rounded border border-rose-400/40 transition-colors cursor-pointer"
-              title="Reset all checkboxes"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>Reset</span>
-            </button>
           </div>
         </header>
 
@@ -396,14 +385,6 @@ export default function App() {
                     Graphical trends, consistency streaks, and habit comparison breakdown
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setIsPdfModalOpen(true)}
-                  className="flex items-center gap-1.5 bg-[#107C41] hover:bg-[#0C5E31] text-white px-3.5 py-1.5 rounded text-xs font-bold shadow-xs transition-colors cursor-pointer"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Report</span>
-                </button>
               </div>
 
               <VisualAnalytics
@@ -414,7 +395,9 @@ export default function App() {
             </div>
           ) : (
             /* View 2: Excel Spreadsheet Grid */
-            <div className="bg-white border-2 border-neutral-400 shadow-md inline-block min-w-full">
+            <>
+            {/* Desktop View */}
+            <div className="hidden sm:inline-block bg-white border-2 border-neutral-400 shadow-md min-w-full">
               <table className="w-full border-collapse text-left border border-neutral-300 select-none">
                 <thead>
                   {/* Row 1: Header Dates */}
@@ -622,18 +605,143 @@ export default function App() {
                 </tbody>
               </table>
             </div>
+
+            {/* Mobile View (Transposed) */}
+            <div className="sm:hidden bg-white border-2 border-neutral-400 shadow-md w-full overflow-x-auto">
+              <table className="w-full border-collapse text-left border border-neutral-300 select-none">
+                <thead>
+                  <tr className="bg-[#E6E6E6] text-neutral-800 border-b-2 border-neutral-400 sticky top-0 z-20">
+                    <th className="border border-neutral-300 p-2 text-xs font-bold text-neutral-800 min-w-[120px] bg-[#E1DFDD] sticky left-0 z-30 shadow-[2px_0_0_0_#9CA3AF]">
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold uppercase tracking-wider text-[11px] text-neutral-700">Date</span>
+                        <button
+                          type="button"
+                          onClick={handleAddDateCol}
+                          className="text-[11px] text-[#107C41] hover:underline font-bold"
+                        >
+                          + Date
+                        </button>
+                      </div>
+                    </th>
+                    {routines.map((routine, rIdx) => (
+                      <th key={routine.id} className="border border-neutral-300 p-1.5 text-center min-w-[140px] bg-[#F2F2F2]">
+                        <div className="flex flex-col items-center group relative">
+                          <span className="text-[10px] text-neutral-500 font-semibold">{rIdx + 1}.</span>
+                          <input
+                            type="text"
+                            value={routine.name}
+                            onChange={(e) => handleUpdateRoutineName(routine.id, e.target.value)}
+                            className="w-full px-1 py-0.5 text-xs font-bold font-mono text-neutral-900 bg-transparent text-center focus:outline-hidden"
+                            placeholder="Routine..."
+                          />
+                          {routines.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteRoutine(routine.id)}
+                              className="text-neutral-400 hover:text-rose-600 p-0.5 mt-1"
+                              title="Delete routine"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                    <th className="border border-neutral-300 p-1 bg-[#F9F9F9] text-center min-w-[36px]">
+                      <button
+                        type="button"
+                        onClick={handleAddRoutine}
+                        className="w-full py-1 text-neutral-600 hover:text-[#107C41] hover:bg-neutral-200 text-xs font-bold flex items-center justify-center"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </th>
+                    <th className="border border-neutral-300 p-2 text-center text-xs font-bold text-neutral-800 bg-[#E1DFDD] min-w-[60px]">
+                      Done
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {dates.map((col) => {
+                    const header = formatDateHeader(col.dateStr);
+                    const isTodayCol = col.dateStr === new Date().toISOString().split('T')[0];
+                    const rowDoneCount = routines.filter((r) => completions[r.id]?.[col.dateStr]).length;
+
+                    return (
+                      <tr key={col.id} className="hover:bg-neutral-50 border-b border-neutral-300">
+                        <td className={`border border-neutral-300 p-1.5 sticky left-0 z-10 shadow-[2px_0_0_0_#9CA3AF] ${isTodayCol ? 'bg-[#D1E7DD]' : 'bg-white'}`}>
+                          <div className="flex items-center gap-1 justify-between">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] text-neutral-500 font-semibold uppercase">{header.dayName}</span>
+                              <input
+                                type="date"
+                                value={col.dateStr}
+                                onChange={(e) => handleUpdateDate(col.id, e.target.value)}
+                                className={`w-[90px] text-xs font-bold font-mono leading-tight focus:outline-hidden bg-transparent ${isTodayCol ? 'text-[#0F5132]' : 'text-neutral-900'}`}
+                              />
+                            </div>
+                            {dates.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteDateCol(col.id)}
+                                className="p-1 text-neutral-400 hover:text-rose-600 rounded"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                        {routines.map((routine) => {
+                          const isDone = Boolean(completions[routine.id]?.[col.dateStr]);
+                          return (
+                            <td
+                              key={routine.id}
+                              onClick={() => handleToggleCell(routine.id, col.dateStr)}
+                              className={`border border-neutral-300 p-1 text-center cursor-pointer transition-colors select-none ${isDone ? 'bg-[#22C55E] hover:bg-[#16A34A]' : 'bg-white hover:bg-neutral-100'}`}
+                            >
+                              <div className="w-full h-9 flex items-center justify-center">
+                                {isDone ? (
+                                  <Check className="w-5 h-5 text-white stroke-[3] drop-shadow-xs" />
+                                ) : (
+                                  <div className="w-4 h-4 rounded-xs border border-neutral-300/80 bg-neutral-50/50" />
+                                )}
+                              </div>
+                            </td>
+                          );
+                        })}
+                        <td className="border border-neutral-300 bg-neutral-50" />
+                        <td className="border border-neutral-300 p-1.5 text-center font-mono font-bold text-xs bg-[#FAFAFA]">
+                          <span className={rowDoneCount > 0 ? 'text-[#107C41]' : 'text-neutral-500'}>
+                            {rowDoneCount} / {routines.length}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  <tr className="bg-[#EBEBEB] font-bold text-neutral-800 border-t-2 border-neutral-400">
+                    <td className="border border-neutral-300 p-2 text-xs text-neutral-900 sticky left-0 z-10 bg-[#E1DFDD] shadow-[2px_0_0_0_#9CA3AF]">
+                      TOTAL
+                    </td>
+                    {routines.map((routine) => {
+                      const routineDoneCount = dates.filter((d) => completions[routine.id]?.[d.dateStr]).length;
+                      return (
+                        <td key={routine.id} className="border border-neutral-300 p-2 text-center font-mono text-xs font-bold text-[#107C41]">
+                          {routineDoneCount}/{dates.length}
+                        </td>
+                      );
+                    })}
+                    <td className="border border-neutral-300 bg-[#EBEBEB]" />
+                    <td className="border border-neutral-300 p-2 text-center font-mono font-black text-xs text-[#107C41] bg-[#D1E7DD]">
+                      {completedBoxes}/{totalBoxes}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            </>
           )}
         </main>
       </div>
-
-      {/* PDF Report Modal */}
-      <PdfReportModal
-        isOpen={isPdfModalOpen}
-        onClose={() => setIsPdfModalOpen(false)}
-        routines={routines}
-        dates={dates}
-        completions={completions}
-      />
 
       {/* Simple Excel Status Footer */}
 
